@@ -9,23 +9,14 @@ defmodule RemoteApi.PointsUpdater do
   @max_user_records 2
   @update_frequency_ms 2_000
 
-  # # # # #
-  # Client
-  # # # # #
-  @doc """
-  Starts the PointsUpdater process
+  @moduledoc """
+    Some module docs
   """
+
   def start_link(opts \\ []) do
     GenServer.start_link(@mod, opts, name: @mod)
   end
 
-  def get_users() do
-    GenServer.call(@mod, :get_users)
-  end
-
-  # # # # #
-  # Server
-  # # # # #
   @impl true
   def init(opts) do
     schedule_work()
@@ -34,7 +25,10 @@ defmodule RemoteApi.PointsUpdater do
     {:ok, %{min_number: min_number, timestamp: nil}}
   end
 
-  # Return users
+  def get_users() do
+    GenServer.call(@mod, :get_users)
+  end
+
   @impl true
   def handle_call(:get_users, _from, %{min_number: min_number, timestamp: timestamp} = state) do
     task = Task.async(fn -> Users.list_by_points(min_number, @max_user_records) end)
@@ -83,18 +77,12 @@ defmodule RemoteApi.PointsUpdater do
     {:noreply, updated_state}
   end
 
-  # Task completed successfully
-  @impl true
-  def handle_info({ref, {:ok, _}}, %{task_in_progress: %Task{ref: ref}} = state) do
-    {:noreply, state}
-  end
-
   @impl true
   def handle_info(_message, state) do
     {:noreply, state}
   end
 
-  def random_number_generator(min, max) do
+  defp random_number_generator(min, max) do
     :rand.uniform(max - min + 1) + min - 1
   end
 

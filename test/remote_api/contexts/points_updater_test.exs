@@ -25,18 +25,6 @@ defmodule RemoteApi.PointsUpdaterTest do
     end
   end
 
-  describe "random_number_generator/2" do
-    test "returns number between given bounds" do
-      min = 0
-      max = 100
-
-      for _ <- 0..1000 do
-        value = PointsUpdater.random_number_generator(min, max)
-        assert value >= min && value <= max
-      end
-    end
-  end
-
   defp insert_user_with_points(points) do
     Repo.insert(%User{points: points})
   end

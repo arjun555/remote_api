@@ -1,19 +1,11 @@
 defmodule RemoteApiWeb.UserJSON do
-  alias RemoteApi.Users.User
 
   def render("index.json", %{users: users, timestamp: timestamp}) do
     %{
       data: %{
-        users: Enum.map(users, &user_json(&1)),
+        users: Enum.map(users, &Map.take(&1, [:id, :points])),
         timestamp: timestamp_json(timestamp)
       }
-    }
-  end
-
-  defp user_json(%User{} = user) do
-    %{
-      id: user.id,
-      points: user.points
     }
   end
 
