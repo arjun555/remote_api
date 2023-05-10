@@ -16,7 +16,7 @@ defmodule RemoteApi.UsersTest do
       assert [^user] = Users.list_by_points(min_points, 1)
     end
 
-    test "returns limited number of users, given limit " do
+    test "returns limited number of users, given limit" do
       insert_user_with_points(10)
       insert_user_with_points(10)
       limit = 1
@@ -42,14 +42,25 @@ defmodule RemoteApi.UsersTest do
     test "updates users with random points between given bounds" do
       {:ok, %{id: user_id}} = insert_user_with_points(10)
       min_points = 0
-      max_points = 1
+      max_points = 100
+      mid_points = (max_points - min_points) / 2
+      samples = 1000
+      acceptable_error = 1
 
-      for _ <- 0..99 do
-        assert {:ok, _} = Users.update_points_for_all_users(min_points, max_points)
+      sum =
+        Enum.reduce(0..samples, fn _, sum ->
+          assert {:ok, _} = Users.update_points_for_all_users(min_points, max_points)
 
-        [%User{id: ^user_id} = updated_user] = Repo.all(User)
-        assert updated_user.points >= min_points && updated_user.points <= max_points
-      end
+          [%User{id: ^user_id} = updated_user] = Repo.all(User)
+
+          assert updated_user.points >= min_points and updated_user.points <= max_points
+
+          sum + updated_user.points
+        end)
+
+      average = sum / samples
+
+      assert average >= mid_points - acceptable_error and average <= mid_points + acceptable_error
     end
   end
 
